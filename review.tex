@@ -48,10 +48,10 @@ Partial Differential Equations (PDEs) serve as fundamental mathematical tools fo
 
 传统网格法的优势非常明确：它们有严谨的误差理论、稳定性条件与可控的收敛性，并已沉淀为大量工业级软件。然而，随着研究从“单一工况的精确求解”转向“跨工况的大规模参数扫描、优化与实时决策”，数值法的代价问题被放大：在高维参数空间中，每一个参数点都要重新网格化与求解；对多尺度系统则需要局部极细网格才能捕捉薄层或激波结构；复杂几何下网格生成本身可能比求解更昂贵。对应地，许多应用场景（例如数字孪生、在线控制、不确定性量化/贝叶斯反演）要求在毫秒到秒级产生解场，传统求解器常无法满足时效。
 
-深度学习的介入改变了“求解”这一概念。神经网络在本质上是高维函数逼近器，其参数化方式不依赖显式网格结构；只要能提供优化信号，就可以逼近 PDE 解或解算子。自从 Raissi 等提出 PINNs 后，“把 PDE 残差当作训练监督”的想法使得无标签求解成为可能，并迅速扩展到逆问题、参数识别与多物理场耦合。与此同时，算子学习路线在“大量仿真数据 $\to$ 学习整体解映射”的框架下得到突破，DeepONet 的结构化算子网络与 FNO 的频域卷积让模型具备离散无关（resolution-invariant）和跨参数泛化能力，显著改变了代理建模与实时推理的性能上限。
+深度学习的介入改变了“求解”这一概念。神经网络在本质上是高维函数逼近器，其参数化方式不依赖显式网格结构；只要能提供优化信号，就可以逼近 PDE 解或解算子。自从 Raissi 等提出 PINNs 后，“把 PDE 残差当作训练监督”的想法使得无标签求解成为可能，并迅速扩展到逆问题、参数识别与多物理场耦合\cite{zhang2021pinn_survey_cn,liu2020pinn_cn}。与此同时，算子学习路线在“大量仿真数据 $\to$ 学习整体解映射”的框架下得到突破，DeepONet 的结构化算子网络与 FNO 的频域卷积让模型具备离散无关（resolution-invariant）和跨参数泛化能力，显著改变了代理建模与实时推理的性能上限\cite{lu2022learning_operators_survey,kovachki2023neural}。
 
 \section{研究意义}
-从理论视角看，深度学习 PDE 求解把“数值分析中的逼近理论”与“机器学习的泛化理论”直接连接起来。PINNs、Deep Ritz、Deep Galerkin 等方法把残差最小化、能量泛函最小化与弱形式投影转化为可微优化问题，使神经网络成为新的函数空间基底。神经算子则从函数空间到函数空间学习映射，扩展了传统降阶模型（ROM）在非线性与高维情况下的适用边界，并激发了对算子逼近、误差上界与样本复杂度的系统研究。
+从理论视角看，深度学习 PDE 求解把“数值分析中的逼近理论”与“机器学习的泛化理论”直接连接起来。PINNs、Deep Ritz、Deep Galerkin 等方法把残差最小化、能量泛函最小化与弱形式投影转化为可微优化问题，使神经网络成为新的函数空间基底\cite{karniadakis2021physicsinformed,liu2023pinn_stiff_cn}。神经算子则从函数空间到函数空间学习映射，扩展了传统降阶模型（ROM）在非线性与高维情况下的适用边界，并激发了对算子逼近、误差上界与样本复杂度的系统研究\cite{chen1995universal,lu2021deeponet,lanthaler2022error_fno}。
 
 从应用角度，深度学习方法提供两种可落地的价值：其一，在数据稀缺或仅有散点观测时，物理约束学习可以用极少数据构造可信解场，从而支持反演、同化与跨域推断；其二，在需要重复求解的参数化场景中，神经算子或代理模型可把“每次求解分钟—小时级”压缩到“推理毫秒级”，将优化与不确定性量化的总成本降到可接受范围。
 
@@ -72,10 +72,10 @@ F(x_1, x_2, \ldots, x_n, u, \frac{\partial u}{\partial x_1}, \frac{\partial u}{\
 其中，$u$ 表示未知函数，$x_1, x_2, \ldots, x_n$ 为自变量。偏微分方程的类型（椭圆型/抛物型/双曲型/混合型）不仅决定了其物理含义，更直接影响解的正则性特征与数值求解的难度。具体而言，Poisson/Helmholtz 等椭圆型方程对应稳态场问题，其解通常具有较好的光滑性；热传导方程等抛物型系统具有时间方向的耗散特性；而双曲型方程（如波动方程、可压缩流动方程）则常出现激波、间断或高梯度特征，这些特性正是深度学习求解器训练不稳定的重要原因之一。
 
 \section{传统数值方法回顾}
-传统数值方法求解偏微分方程的基本思路是将连续问题离散化。有限差分法（FDM）基于 Taylor 展开理论，采用差商近似偏导数；有限元法（FEM）基于变分原理，在单元内采用基函数近似未知函数；有限体积法（FVM）则基于控制体积的积分守恒。传统方法的误差主要来源于空间离散的截断误差、时间离散的截断误差以及迭代求解的数值误差。相比之下，深度学习方法采用神经网络 $u_\theta$ 作为解的参数化表示，其误差来源转变为函数逼近误差与优化误差。这种范式转换使得求解问题的核心从“离散稳定性分析”转变为“优化景观设计与梯度尺度匹配”。
+传统数值方法求解偏微分方程的基本思路是将连续问题离散化。有限差分法（FDM）基于 Taylor 展开理论，采用差商近似偏导数；有限元法（FEM）基于变分原理，在单元内采用基函数近似未知函数；有限体积法（FVM）则基于控制体积的积分守恒。传统方法的误差主要来源于空间离散的截断误差、时间离散的截断误差以及迭代求解的数值误差。相比之下，深度学习方法采用神经网络 $u_\theta$ 作为解的参数化表示，其误差来源转变为函数逼近误差与优化误差\cite{brunton2020datadriven_pde,rudy2017datadriven_pde}。这种范式转换使得求解问题的核心从“离散稳定性分析”转变为“优化景观设计与梯度尺度匹配”。
 
 \section{深度学习方法的基本思想与分类}
-深度学习求解偏微分方程的核心思想，是将原本依赖数值离散与迭代求解的 PDE 问题转化为神经网络参数优化问题。通过以神经网络 $u_{\theta}$ 或算子映射 $G_{\theta}$ 参数化未知函数或解算子，求解过程不再依赖固定网格或显式离散格式，而是在连续空间中通过端到端优化自动学习 PDE 的解结构或解映射规律。这一范式的根本变化，使得深度学习方法能够在高维空间、复杂几何以及参数化 PDE 等传统数值方法难以处理的场景中展现显著优势。
+深度学习求解偏微分方程的核心思想，是将原本依赖数值离散与迭代求解的 PDE 问题转化为神经网络参数优化问题。通过以神经网络 $u_{\theta}$ 或算子映射 $G_{\theta}$ 参数化未知函数或解算子，求解过程不再依赖固定网格或显式离散格式，而是在连续空间中通过端到端优化自动学习 PDE 的解结构或解映射规律。这一范式的根本变化，使得深度学习方法能够在高维空间、复杂几何以及参数化 PDE 等传统数值方法难以处理的场景中展现显著优势\cite{sun2021physics_dl_cn,li2021physicsinformed}。
 
 根据物理信息利用方式与任务目标的不同，深度学习求解 PDE 的方法大体可分为以下三类：
 
@@ -91,7 +91,7 @@ F(x_1, x_2, \ldots, x_n, u, \frac{\partial u}{\partial x_1}, \frac{\partial u}{\
 \chapter{物理信息神经网络（PINN）}
 
 \section{PINN基本原理}
-物理信息神经网络（PINNs）由 Raissi 等人于 2019 年提出\cite{raissi2019physics}，其核心思想是将偏微分方程作为约束条件融入神经网络的损失函数中。考虑一般形式的偏微分方程：
+物理信息神经网络（PINNs）由 Raissi 等人于 2019 年提出\cite{raissi2019physics}，其核心思想是将偏微分方程作为约束条件融入神经网络的损失函数中，随后被广泛综述并工程化实现\cite{zhang2021pinn_survey_cn,lu2021deepxde,liu2021pde_dl_cn}。考虑一般形式的偏微分方程：
 \begin{equation}
 \mathcal{N}[u](x,t) = 0, \quad (x,t) \in \Omega \times [0,T]
 \label{eq:pinn_pde}
@@ -165,11 +165,11 @@ PINN 方法的第四个核心优势体现在其数据高效性上，即能够在
 综上所述,虽然 PINN 在理论上具备无网格、统一正逆问题框架、数据高效等诸多优势,但其训练过程中的频谱偏置、梯度竞争与多尺度数值病态等问题构成了当前研究的核心挑战。这些病态问题的存在促使研究者开发了大量改进策略,包括自适应权重调整、自适应采样、傅里叶特征嵌入、因果训练等技术,这将在下一节详细讨论。
 \section{改进方法}
 
-针对 PINN 训练过程中的频谱偏置、梯度竞争与多尺度数值病态等系统性挑战，研究者在近年来逐步形成了一套可复用的改进策略体系。这些改进方法可从损失函数设计、采样策略优化、网络架构增强、求解域分解以及约束形式转换等多个维度进行系统分类。
+针对 PINN 训练过程中的频谱偏置、梯度竞争与多尺度数值病态等系统性挑战，研究者在近年来逐步形成了一套可复用的改进策略体系。这些改进方法可从损失函数设计、采样策略优化、网络架构增强、求解域分解以及约束形式转换等多个维度进行系统分类\cite{wang2021understanding_pinn,krishnapriyan2021characterizing}.
 
 \subsection{自适应权重与梯度均衡策略}
 
-第一类改进思路聚焦于损失函数中多项约束的权重动态调整，以解决梯度竞争导致的优化失衡\cite{liu2023pinn_stiff_cn}问题。经典 PINN 采用固定的损失权重组合，这要求研究者预先对不同物理项的重要性进行人工标定，不仅繁琐且难以保证在整个训练过程中的适配性。为此，自适应权重方法应运而生，其核心思想是根据训练阶段动态调节各损失项的有效梯度贡献，使物理残差、初值条件、边界条件等多项约束在优化过程中保持同量级的梯度范数，从而显著提升收敛稳定性与最终精度。
+第一类改进思路聚焦于损失函数中多项约束的权重动态调整，以解决梯度竞争导致的优化失衡\cite{liu2023pinn_stiff_cn}问题。经典 PINN 采用固定的损失权重组合，这要求研究者预先对不同物理项的重要性进行人工标定，不仅繁琐且难以保证在整个训练过程中的适配性。为此，自适应权重方法应运而生，其核心思想是根据训练阶段动态调节各损失项的有效梯度贡献，使物理残差、初值条件、边界条件等多项约束在优化过程中保持同量级的梯度范数，从而显著提升收敛稳定性与最终精度\cite{mcclenny2020selfadaptive,wang2022and,lu2021causal_pinn}。
 
 具体而言，PINN-NTK 方法基于神经切空间核（Neural Tangent Kernel）理论，通过分析不同损失项对应的核矩阵特征值分布，动态调整权重以平衡收敛速度\cite{wang2022and,wang2021understanding_pinn}。Self-adaptive PINNs 则引入可学习的权重参数，将权重调整本身纳入端到端优化过程，通过梯度统计量（如梯度范数比值）自动调节各项权重\cite{mcclenny2020selfadaptive}。MultiAdam 等方法更进一步，为每一项损失配置独立的优化器与学习率调度器，使不同物理约束可以在各自适配的优化路径上演化，避免单一优化器无法同时适应多尺度梯度信号的困境\cite{jagtap2020adaptive_pinn}。实验表明，这类方法在处理多物理场耦合问题时，可将训练迭代次数减少 50\%-80\%，同时显著降低解的相对误差。
 
@@ -177,19 +177,19 @@ PINN 方法的第四个核心优势体现在其数据高效性上，即能够在
 
 第二类改进策略着眼于训练配点（collocation points）的空间分布优化，以克服固定采样导致的局部精度不足问题。传统 PINN 在训练过程中使用固定的配点分布（如均匀采样或拟蒙特卡洛采样），这种静态采样策略无法感知网络在不同区域的学习难度差异，导致在解变化剧烈的区域（如激波、边界层、尖锐界面）精度严重不足，而在光滑区域则存在过度采样的计算浪费。
 
-残差自适应细化（Residual-based Adaptive Refinement, RAR）方法通过周期性评估当前网络在求解域内的 PDE 残差分布，将新的配点不断"拉向"残差大的区域，使网络重点学习激波、薄层等难点结构\cite{daw2022rar,lu2021deepxde}。这种策略本质上是一种无网格的自适应网格细化（Adaptive Mesh Refinement）思想的神经网络版本。Gaussian-mixture 采样则假设残差分布可由多个高斯分量的混合建模，通过期望最大化（EM）算法自适应更新采样分布的均值与方差，实现对多个高残差区域的同步关注\cite{mcclenny2020selfadaptive}。Adversarial sampling 进一步引入对抗学习思想，将配点生成器视为对抗网络中的"生成器"，以最大化残差为目标生成新样本，迫使 PINN 网络（"判别器"）不断提升对困难样本的学习能力\cite{yang2019adversarial_sampling}。实践表明，结合自适应采样的 PINN 可在相同配点总数下将解精度提升 1-2 个数量级，特别是在处理双曲型方程的间断解时表现出明显优势。
+残差自适应细化（Residual-based Adaptive Refinement, RAR）方法通过周期性评估当前网络在求解域内的 PDE 残差分布，将新的配点不断"拉向"残差大的区域，使网络重点学习激波、薄层等难点结构\cite{daw2022rar,lu2021deepxde}。这种策略本质上是一种无网格的自适应网格细化（Adaptive Mesh Refinement）思想的神经网络版本。Gaussian-mixture 采样则假设残差分布可由多个高斯分量的混合建模，通过期望最大化（EM）算法自适应更新采样分布的均值与方差，实现对多个高残差区域的同步关注\cite{mcclenny2020selfadaptive}。Adversarial sampling 进一步引入对抗学习思想，将配点生成器视为对抗网络中的"生成器"，以最大化残差为目标生成新样本，迫使 PINN 网络（"判别器"）不断提升对困难样本的学习能力\cite{yang2019adversarial_sampling}。实践表明，结合自适应采样的 PINN 可在相同配点总数下将解精度提升 1-2 个数量级，特别是在处理双曲型方程的间断解时表现出明显优势\cite{mao2020pinns_difficult,li2023pinn_shock_cn}。
 
 \subsection{多尺度网络架构与频域增强}
 
 第三类改进方向通过重新设计网络架构或特征编码方式，直接缓解神经网络固有的频谱偏置问题。研究表明，标准全连接网络在随机初始化后，其神经切空间核在高频方向的特征值呈指数衰减，导致网络对高频信号的学习速度极慢。为此，研究者提出了多种多尺度与频域增强结构。
 
-Multi-scale PINN 采用多分支网络架构，每个分支专注于不同空间或时间尺度的特征提取，最后通过融合层组合各尺度信息得到最终解\cite{wang2021understanding_pinn,jagtap2020extended_pinn}。这种设计类似于计算机视觉中的特征金字塔网络（FPN），特别适用于湍流、多相流等本质上多尺度的物理问题。Fourier Feature Embedding 则在输入层引入随机傅里叶特征，通过高频正弦/余弦基函数对输入坐标进行非线性映射，从而将低频输入空间提升到高维高频特征空间，显著增强网络对高频分量的表达能力\cite{wang2021understanding_pinn}。SIREN（Sinusoidal Representation Networks）用正弦激活函数替代传统的 ReLU 或 Tanh，使网络天然具备周期性特征表示能力，其梯度在频域上的分布更加均匀\cite{wang2022and}。LAAF（Locally Adaptive Activation Functions）进一步引入可学习的局部激活函数参数，允许网络在不同区域自适应调整频率响应特性\cite{jagtap2020locally}。实验验证表明，这类方法在处理包含高频震荡或尖锐梯度的 PDE 时，可将残差误差降低 2-3 个数量级。
+Multi-scale PINN 采用多分支网络架构，每个分支专注于不同空间或时间尺度的特征提取，最后通过融合层组合各尺度信息得到最终解\cite{wang2021understanding_pinn,jagtap2020extended_pinn}。这种设计类似于计算机视觉中的特征金字塔网络（FPN），特别适用于湍流、多相流等本质上多尺度的物理问题\cite{yang2021multiscale_dl_cn}。Fourier Feature Embedding 则在输入层引入随机傅里叶特征，通过高频正弦/余弦基函数对输入坐标进行非线性映射，从而将低频输入空间提升到高维高频特征空间，显著增强网络对高频分量的表达能力\cite{wang2021understanding_pinn}。SIREN（Sinusoidal Representation Networks）用正弦激活函数替代传统的 ReLU 或 Tanh，使网络天然具备周期性特征表示能力，其梯度在频域上的分布更加均匀\cite{wang2022and}。LAAF（Locally Adaptive Activation Functions）进一步引入可学习的局部激活函数参数，允许网络在不同区域自适应调整频率响应特性\cite{jagtap2020locally}。实验验证表明，这类方法在处理包含高频震荡或尖锐梯度的 PDE 时，可将残差误差降低 2-3 个数量级。
 
 \subsection{域分解与并行训练框架}
 
 第四类改进策略借鉴传统数值方法中的区域分解思想，通过将大规模或强非线性求解域拆分为多个子域，化"一个难优化问题"为"多个易优化子问题"，同时天然适配并行计算架构。
 
-XPINN（eXtended PINN）将求解域 $\Omega$ 分解为若干重叠或非重叠子域 $\{\Omega_i\}$，每个子域由独立的神经网络 $u_{\theta_i}$ 求解，子域之间通过界面连续性条件（如 Dirichlet-Neumann 交替或 Robin 边界条件）进行耦合\cite{jagtap2020extended_pinn}。这种方法不仅降低了单个网络的优化难度，还允许对不同子域采用不同的网络架构或训练策略，实现局部自适应。FBPINN（Finite Basis PINN）进一步结合有限元思想，在每个子域内使用紧支撑的窗函数与神经网络乘积作为局部解表示，通过子域边界处的弱连续性条件组装全局解，这种设计使得网络可以在子域内独立优化而不受远场干扰\cite{jagtap2022fbpinn}。实验表明，域分解 PINN 在处理长时间演化、复杂几何或多物理场耦合问题时，可实现近线性的并行加速比，同时显著提升解的全局一致性。
+XPINN（eXtended PINN）将求解域 $\Omega$ 分解为若干重叠或非重叠子域 $\{\Omega_i\}$，每个子域由独立的神经网络 $u_{\theta_i}$ 求解，子域之间通过界面连续性条件（如 Dirichlet-Neumann 交替或 Robin 边界条件）进行耦合\cite{jagtap2020extended_pinn,meng2020pinn_multiphysics}。这种方法不仅降低了单个网络的优化难度，还允许对不同子域采用不同的网络架构或训练策略，实现局部自适应。FBPINN（Finite Basis PINN）进一步结合有限元思想，在每个子域内使用紧支撑的窗函数与神经网络乘积作为局部解表示，通过子域边界处的弱连续性条件组装全局解，这种设计使得网络可以在子域内独立优化而不受远场干扰\cite{jagtap2022fbpinn}。实验表明，域分解 PINN 在处理长时间演化、复杂几何或多物理场耦合问题时，可实现近线性的并行加速比，同时显著提升解的全局一致性。
 
 \subsection{硬约束与变分形式的改进}
 
@@ -201,7 +201,7 @@ XPINN（eXtended PINN）将求解域 $\Omega$ 分解为若干重叠或非重叠�
 
 \textbf{变分物理信息神经网络（Variational PINN）}
 
-当 PDE 解不够光滑（如含弱间断）或输入数据包含噪声时，强形式 PINN 所依赖的逐点残差匹配需要精确计算高阶导数，这会显著放大自动微分过程中的数值噪声，导致训练极其脆弱甚至失败。弱形式与变分 PINN 的核心思想是将 PDE 转化为变分形式或弱形式，用加权积分（通过引入测试函数 $v$）替代逐点导数匹配，从而降低对解的光滑性要求，同时使训练信号对局部不光滑更具鲁棒性\cite{kharazmi2019hpvpinn,kharazmi2021vpinn,baltar2022weak_pinn}。
+当 PDE 解不够光滑（如含弱间断）或输入数据包含噪声时，强形式 PINN 所依赖的逐点残差匹配需要精确计算高阶导数，这会显著放大自动微分过程中的数值噪声，导致训练极其脆弱甚至失败。弱形式与变分 PINN 的核心思想是将 PDE 转化为变分形式或弱形式，用加权积分（通过引入测试函数 $v$）替代逐点导数匹配，从而降低对解的光滑性要求，同时使训练信号对局部不光滑更具鲁棒性\cite{kharazmi2019hpvpinn,kharazmi2021vpinn,baltar2022weak_pinn,mao2020vpinn}。
 
 具体而言，对于椭圆型方程 $-\nabla \cdot (a \nabla u) = f$，其弱形式为 $\int_\Omega a \nabla u \cdot \nabla v \, dx = \int_\Omega f v \, dx$。变分 PINN 直接将该双线性形式作为损失函数，通过选择合适的测试函数集（如随机采样的平滑函数、多项式基或神经网络本身）进行离散化。这种方式的优势在于：（1）只需计算一阶导数，避免了强形式中二阶导数引入的数值不稳定；（2）对解的不连续性具有天然容忍度，因为积分形式本身就是对局部信息的平滑化；（3）自然处理 Neumann 边界条件，无需额外的边界损失项。hp-VPINN（hp-Variational PINN）进一步结合域分解与高阶多项式测试基，在每个子域内使用高阶 Legendre 多项式作为测试函数，通过 $h$-细化（子域数量增加）与 $p$-细化（多项式阶数提升）的自适应策略，使方法在复杂几何和多尺度椭圆/抛物方程中表现出更高的稳定性与收敛性\cite{kharazmi2019hpvpinn,jagtap2020extended_pinn}。
 
@@ -213,7 +213,7 @@ XPINN（eXtended PINN）将求解域 $\Omega$ 分解为若干重叠或非重叠�
 \chapter{神经算子学习：从函数逼近到算子映射}
 
 \section{神经算子的理论范式}
-传统的物理信息神经网络（PINNs）虽然在求解特定偏微分方程（PDE）实例方面表现出色，但其本质上属于“实例求解器”，一旦方程的参数、边界条件或源项发生变化，网络必须重新训练。为了克服这一局限，神经算子（Neural Operators）作为一种新的科学计算范式被提出，其目标是将神经网络的学习对象从单一的函数解提升为无限维函数空间之间的非线性算子。数学上，若设 $\mathcal{A}$ 和 $\mathcal{U}$ 分别为输入函数空间（如初始场或系数场）和输出解空间，PDE 的求解过程可被视为算子映射 $G^\dagger: \mathcal{A} \to \mathcal{U}$。神经算子旨在通过参数化模型 $G_\theta$ 来逼近该算子，根据广义算子逼近定理（Generalized Universal Approximation Theorem），在网络宽度和深度充足的前提下，神经网络能够以任意精度逼近任意连续非线性算子。该范式最显著的特征在于其“离散无关性”（Discretization Invariance）：模型学习的是连续空间上的映射规则，因此在训练完成后，可直接应用于任意分辨率的网格进行推理，这为多尺度物理模拟提供了理论基础。主流的神经算子架构通常借鉴格林函数法的思想，采用“迭代积分”的形式更新特征场 $v(x)$：
+传统的物理信息神经网络（PINNs）虽然在求解特定偏微分方程（PDE）实例方面表现出色，但其本质上属于“实例求解器”，一旦方程的参数、边界条件或源项发生变化，网络必须重新训练。为了克服这一局限，神经算子（Neural Operators）作为一种新的科学计算范式被提出，其目标是将神经网络的学习对象从单一的函数解提升为无限维函数空间之间的非线性算子\cite{lu2022learning_operators_survey,kovachki2023neural}。数学上，若设 $\mathcal{A}$ 和 $\mathcal{U}$ 分别为输入函数空间（如初始场或系数场）和输出解空间，PDE 的求解过程可被视为算子映射 $G^\dagger: \mathcal{A} \to \mathcal{U}$。神经算子旨在通过参数化模型 $G_\theta$ 来逼近该算子，根据广义算子逼近定理（Generalized Universal Approximation Theorem），在网络宽度和深度充足的前提下，神经网络能够以任意精度逼近任意连续非线性算子。该范式最显著的特征在于其“离散无关性”（Discretization Invariance）：模型学习的是连续空间上的映射规则，因此在训练完成后，可直接应用于任意分辨率的网格进行推理，这为多尺度物理模拟提供了理论基础。主流的神经算子架构通常借鉴格林函数法的思想，采用“迭代积分”的形式更新特征场 $v(x)$：
 \begin{equation}
 v_{l+1}(x) = \sigma \left( W v_l(x) + \int_{D} \kappa(x, y; \phi) v_l(y) dy \right)
 \end{equation}
@@ -222,7 +222,7 @@ v_{l+1}(x) = \sigma \left( W v_l(x) + \int_{D} \kappa(x, y; \phi) v_l(y) dy \rig
 
 \subsection{理论基础与算子逼近范式}
 
-作为算子学习领域的开创性工作，DeepONet（Deep Operator Network）由 Lu 等人于 2019 年提出\cite{lu2021deeponet}，标志着深度学习从"学习单个函数"向"学习函数空间之间的映射算子"的范式转变\cite{lu2021deeponet,lu2022learning_operators_survey}。其理论基础源于 Chen 和 Chen 于 1995 年建立的通用算子逼近定理（Universal Approximation Theorem for Operators），该定理证明了任意连续非线性算子 $G^\dagger: \mathcal{A} \to \mathcal{U}$ 都可以被一个具有足够宽度或深度的神经网络以任意精度逼近\cite{chen1995universal}。这一理论保证为算子学习提供了坚实的数学根基，使得 DeepONet 能够在原则上逼近 PDE 求解这一本质上的算子映射过程。
+作为算子学习领域的开创性工作，DeepONet（Deep Operator Network）由 Lu 等人于 2019 年提出\cite{lu2021deeponet}，标志着深度学习从"学习单个函数"向"学习函数空间之间的映射算子"的范式转变\cite{lu2021deeponet,lu2022learning_operators_survey}。其理论基础源于 Chen 和 Chen 于 1995 年建立的通用算子逼近定理（Universal Approximation Theorem for Operators），该定理证明了任意连续非线性算子 $G^\dagger: \mathcal{A} \to \mathcal{U}$ 都可以被一个具有足够宽度或深度的神经网络以任意精度逼近\cite{chen1995universal}。这一理论保证为算子学习提供了坚实的数学根基，使得 DeepONet 能够在原则上逼近 PDE 求解这一本质上的算子映射过程\cite{guo2023deeponet_cn,yao2023deeponet_cn}。
 
 具体而言，算子逼近理论表明，任意算子 $G(a)(y)$ 可被近似为两组函数的内积形式：
 \begin{equation}
@@ -268,7 +268,7 @@ DeepONet 的核心优势体现在其对参数化 PDE 族的一次性学习能力
 
 DeepONet 虽然通过双塔结构实现了算子的参数化表示，但其本质上仍在空间域进行积分计算，这导致两个关键瓶颈：其一，全局积分 $\int_D \kappa(x,y) v(y) dy$ 的计算复杂度为 $O(N^2)$（$N$ 为空间离散点数），在高分辨率网格上难以承受；其二，空间域的核函数 $\kappa(x,y)$ 通常需要对所有点对进行参数化，参数量随网格规模平方增长。为了从根本上突破这一计算瓶颈，Li 等人于 2020 年提出了 Fourier Neural Operator (FNO)\cite{li2020neural_operator,li2021fourier}，创新性地将核积分算子的计算迁移至频域，利用卷积定理实现了计算效率与参数规模的双重突破\cite{li2020neural_operator,li2021fourier}。
 
-卷积定理（Convolution Theorem）揭示了空间域卷积与频域点乘之间的等价关系：
+卷积定理（Convolution Theorem）揭示了空间域卷积与频域点乘之间的等价关系\cite{li2021fourier}：
 \begin{equation}
 (f \ast g)(x) = \mathcal{F}^{-1}\{\mathcal{F}(f) \cdot \mathcal{F}(g)\}(x)
 \end{equation}
@@ -309,7 +309,7 @@ v_{l+1}(x) = \sigma \left( W v_l(x) + \mathcal{F}^{-1}(R \cdot \mathcal{F}(v_l))
 
 \subsection{核心技术优势}
 
-FNO 的频域设计带来了三个层面的显著优势，使其在算子学习领域迅速成为主流方法之一。
+FNO 的频域设计带来了三个层面的显著优势，使其在算子学习领域迅速成为主流方法之一\cite{huang2022fno_cn,cao2021choose_fno,lanthaler2022error_fno}。
 
 \textbf{全局感受野与长程依赖建模}
 
@@ -333,7 +333,7 @@ FNO 最具革命性的特性在于其对网格分辨率的无关性（Resolution
 
 \textbf{复杂几何的处理策略}
 
-为了克服这一局限，研究者提出了多种几何扩展方案。Geo-FNO 通过坐标映射（coordinate mapping）技术，将物理域 $\Omega_{\text{phys}}$ 变换至标准计算域 $\Omega_{\text{comp}}$（如单位正方形），在计算域上应用 FNO 后再映射回物理域，从而间接处理不规则几何\cite{li2022gino}。然而，这种方法对映射质量敏感，在存在极端变形或拓扑复杂性时可能失效。Deformation-FNO 进一步引入可学习的变形场，允许网络自适应调整频域表示以适应几何形状\cite{li2022gino}。GINO（Geometry-Informed Neural Operator） 则结合了图神经网络与傅里叶卷积，在结构化区域使用 FNO 高效捕捉全局模式，在不规则边界附近使用图卷积处理局部几何细节，实现了几何灵活性与计算效率的平衡\cite{li2022gino}。
+为了克服这一局限，研究者提出了多种几何扩展方案。Geo-FNO 通过坐标映射（coordinate mapping）技术，将物理域 $\Omega_{\text{phys}}$ 变换至标准计算域 $\Omega_{\text{comp}}$（如单位正方形），在计算域上应用 FNO 后再映射回物理域，从而间接处理不规则几何\cite{li2022gino}。然而，这种方法对映射质量敏感，在存在极端变形或拓扑复杂性时可能失效。Deformation-FNO 进一步引入可学习的变形场，允许网络自适应调整频域表示以适应几何形状\cite{li2022gino}。GINO（Geometry-Informed Neural Operator） 则结合了图神经网络与傅里叶卷积，在结构化区域使用 FNO 高效捕捉全局模式，在不规则边界附近使用图卷积处理局部几何细节，实现了几何灵活性与计算效率的平衡\cite{li2022gino,li2020graphneuraloperator,chen2023gnn_pde_cn}。
 
 \textbf{局部奇异性的挑战}
 
@@ -347,7 +347,7 @@ FNO 最具革命性的特性在于其对网格分辨率的无关性（Resolution
 
 FNO 虽然在规则网格上实现了高效的全局算子学习，但其对快速傅里叶变换的依赖使其难以处理工程实际中广泛存在的复杂几何。真实物理系统往往定义在高度不规则的空间域上：机翼型面、车身外形、器官结构、多孔介质等，这些几何形状无法嵌入规则网格而不引入巨大计算浪费。传统 CFD 与 FEA 早已转向非结构化网格（Unstructured Grids），通过三角形、四面体等单元灵活拟合复杂边界。因此，构建能够天然处理非结构化数据的神经算子成为算子学习走向工程实用的关键。
 
-图神经算子（Graph Neural Operator, GNO）的核心思想是将物理域的离散化表示从"规则网格阵列"转变为"图结构 $G=(V, E)$"，通过图神经网络的消息传递机制将连续核积分算子近似为图上的邻域聚合操作\cite{li2020graphneuraloperator,li2022gino}。
+图神经算子（Graph Neural Operator, GNO）的核心思想是将物理域的离散化表示从"规则网格阵列"转变为"图结构 $G=(V, E)$"，通过图神经网络的消息传递机制将连续核积分算子近似为图上的邻域聚合操作\cite{li2020graphneuraloperator,li2022gino,chen2023gnn_pde_cn,sun2023gnn_operator_cn}。
 
 \subsection{核心机制与技术优势}
 
@@ -366,7 +366,7 @@ GNO 的核心优势体现在：（1）几何自适应性：可直接处理任意
 
 \subsection{混合架构：GINO 与点云方法}
 
-GNO 的局部邻域聚合机制在捕捉长程依赖时效率较低，需堆叠多层才能扩大感受野。为结合 FNO 的全局高效性与 GNO 的局部几何适应性，  GINO（Geometry-Informed Neural Operator）  将物理域分解为结构化区域与非结构化区域：在流场主体使用 FNO 高效捕捉全局模式，在几何复杂的边界附近使用图卷积处理局部细节，通过插值或注意力机制在两种网格间传递特征\cite{li2022gino,li2020graphneuraloperator}。实验表明，GINO 在大规模复杂外流场预测（如汽车空气动力学、飞机绕流）中取得了 SOTA 性能，相比纯 FNO 在复杂几何案例中误差降低 30\%-50\%，相比纯 GNO 计算速度提升 5-10 倍\cite{li2022gino,li2020graphneuraloperator}。
+GNO 的局部邻域聚合机制在捕捉长程依赖时效率较低，需堆叠多层才能扩大感受野。为结合 FNO 的全局高效性与 GNO 的局部几何适应性，  GINO（Geometry-Informed Neural Operator）  将物理域分解为结构化区域与非结构化区域：在流场主体使用 FNO 高效捕捉全局模式，在几何复杂的边界附近使用图卷积处理局部细节，通过插值或注意力机制在两种网格间传递特征\cite{li2022gino,li2020graphneuraloperator}。实验表明，GINO 在大规模复杂外流场预测（如汽车空气动力学、飞机绕流）中取得了 SOTA 性能，相比纯 FNO 在复杂几何案例中误差降低 30\%-50\%，相比纯 GNO 计算速度提升 5-10 倍\cite{li2022gino,li2020graphneuraloperator,fang2022neural_operator_solid_cn}。
 
 此外，PCNO（Point Cloud Neural Operator）直接在点云上学习算子映射，通过置换不变聚合完全摆脱显式拓扑连接，特别适用于粒子方法加速与形状优化问题\cite{li2020graphneuraloperator}。  MeshGraphNets   则在网格拓扑上构建多层图编码不同尺度几何信息，在布料仿真、流固耦合等任务中实现接近传统求解器的精度且推理速度提升 2-3 个数量级\cite{li2020graphneuraloperator}。
 
@@ -380,7 +380,7 @@ GNO 天然具备处理任意复杂几何形状的能力，具有极强的几何�
 
 
 \section{注意力机制与积分算子的同构性}
-随着 Transformer 在序列建模中的成功，研究者开始探索注意力机制在算子学习中的物理可解释性。数学上，Self-Attention 机制中的 Attention Map 可以被严格解释为一种数据驱动的动态积分核 $\kappa(x,y)$。与 FNO 中固定的平移不变卷积核不同，注意力机制能够根据输入特征（Query 和 Key）动态调整积分权重：
+随着 Transformer 在序列建模中的成功，研究者开始探索注意力机制在算子学习中的物理可解释性。数学上，Self-Attention 机制中的 Attention Map 可以被严格解释为一种数据驱动的动态积分核 $\kappa(x,y)$\cite{cao2021choose_fno}。与 FNO 中固定的平移不变卷积核不同，注意力机制能够根据输入特征（Query 和 Key）动态调整积分权重：
 \begin{equation}
 \text{Attention}(Q, K, V) \approx \int \kappa(x,y)v(y)dy
 \end{equation}
@@ -411,13 +411,13 @@ GNO 天然具备处理任意复杂几何形状的能力，具有极强的几何�
 \section{生成式模型与扩散 PDE 求解\cite{zhao2022generative_pde_cn,xu2023diffusion_pde_cn}}
 
 \subsection{从确定性回归到概率分布建模}
-传统的基于神经网络的 PDE 求解方法（如 PINNs 和 DeepONet）通常被构建为确定性的回归问题，即寻找一个单一的最优解函数以最小化残差或数据误差。然而，在面对反问题求解、高雷诺数湍流模拟以及数据稀缺场景下的不确定性量化（Uncertainty Quantification, UQ）时，点估计方法往往难以捕捉解的多模态分布特性。生成式模型（Generative Models）的引入标志着求解范式从“寻找单一解”向“模拟解的条件概率分布”转变。通过学习数据分布 $p(u|y)$（其中 $u$ 为物理场，$y$ 为观测条件），生成式模型不仅能够重构高保真的物理场，还能通过采样直接评估预测的不确定性，为复杂物理系统的建模提供了新的统计力学视角。
+传统的基于神经网络的 PDE 求解方法（如 PINNs 和 DeepONet）通常被构建为确定性的回归问题，即寻找一个单一的最优解函数以最小化残差或数据误差。然而，在面对反问题求解、高雷诺数湍流模拟以及数据稀缺场景下的不确定性量化（Uncertainty Quantification, UQ）时，点估计方法往往难以捕捉解的多模态分布特性。生成式模型（Generative Models）的引入标志着求解范式从“寻找单一解”向“模拟解的条件概率分布”转变\cite{zhao2022generative_pde_cn,liu2022pinn_uncertainty,yang2021bayesian_pinn}。通过学习数据分布 $p(u|y)$（其中 $u$ 为物理场，$y$ 为观测条件），生成式模型不仅能够重构高保真的物理场，还能通过采样直接评估预测的不确定性，为复杂物理系统的建模提供了新的统计力学视角。
 
 \subsection{早期探索：对抗生成与变分推断}
-早期的研究主要集中在物理信息生成对抗网络（Physics-Informed GANs, PI-GANs）\cite{yang2020pigans}和变分自编码器（VAEs）。PI-GANs 通过在判别器中引入 PDE 残差项，迫使生成器产生的样本不仅符合数据分布，同时满足物理约束。这种对抗博弈机制在模拟随机渗透率场中的达西流（Darcy Flow）等问题上取得了一定成功。然而，GANs 固有的训练不稳定性（如模式坍塌）以及 VAEs 在生成高频纹理时的模糊性，限制了它们在精细流场模拟中的应用。尽管如此，这些工作证实了深度生成模型具备在无标签数据情况下，仅依靠物理控制方程生成符合物理规律解空间的能力。
+早期的研究主要集中在物理信息生成对抗网络（Physics-Informed GANs, PI-GANs）\cite{yang2020pigans}和变分自编码器（VAEs）。PI-GANs 通过在判别器中引入 PDE 残差项，迫使生成器产生的样本不仅符合数据分布，同时满足物理约束。这种对抗博弈机制在模拟随机渗透率场中的达西流（Darcy Flow）等问题上取得了一定成功。然而，GANs 固有的训练不稳定性（如模式坍塌）以及 VAEs 在生成高频纹理时的模糊性，限制了它们在精细流场模拟中的应用。尽管如此，这些工作证实了深度生成模型具备在无标签数据情况下，仅依靠物理控制方程生成符合物理规律解空间的能力\cite{xu2023diffusion_pde_cn}.
 
 \subsection{扩散模型：随机微分方程的逆向求解}
-近年来，去噪扩散概率模型（Denoising Diffusion Probabilistic Models, DDPM）\cite{ho2020denoising}和基于分数的生成模型（Score-based Generative Models, SGM）的兴起，为 PDE 求解带来了突破性进展。从理论层面看，扩散模型的正向过程本身就是一个由随机微分方程（SDE）描述的物理扩散过程（即热方程演化），其将结构化数据逐渐转化为高斯噪声；而逆向生成过程则对应于求解一个逆时间的 SDE。根据 Anderson 定理，这一逆向过程完全由数据分布的“分数函数”（Score Function，即对数概率密度梯度 $\nabla_x \log p(x)$）决定。因此，训练扩散模型本质上是在学习高维物理场分布的梯度场。这种严格的数学等价性使得扩散模型在处理高维、非线性 PDE 时表现出极高的稳定性和样本质量，特别是在生成具有精细相干结构的湍流场方面，其表现显著优于 GANs。
+近年来，去噪扩散概率模型（Denoising Diffusion Probabilistic Models, DDPM）\cite{ho2020denoising}和基于分数的生成模型（Score-based Generative Models, SGM）的兴起，为 PDE 求解带来了突破性进展\cite{xu2023diffusion_pde_cn,xu2020pinn_fluid_cn}。从理论层面看，扩散模型的正向过程本身就是一个由随机微分方程（SDE）描述的物理扩散过程（即热方程演化），其将结构化数据逐渐转化为高斯噪声；而逆向生成过程则对应于求解一个逆时间的 SDE。根据 Anderson 定理，这一逆向过程完全由数据分布的“分数函数”（Score Function，即对数概率密度梯度 $\nabla_x \log p(x)$）决定。因此，训练扩散模型本质上是在学习高维物理场分布的梯度场。这种严格的数学等价性使得扩散模型在处理高维、非线性 PDE 时表现出极高的稳定性和样本质量，特别是在生成具有精细相干结构的湍流场方面，其表现显著优于 GANs。
 
 \subsection{物理引导的扩散采样与超分辨率}
 为了将物理定律更深层次地融入扩散模型，最新的研究提出了“物理引导采样”（Physics-Guided Sampling）策略。不同于在训练阶段将 PDE 残差加入损失函数（这需要重新训练模型），该策略利用预训练的扩散模型作为先验，在推理采样阶段（Sampling Phase）引入物理约束。通过在朗之万动力学（Langevin Dynamics）迭代中加入基于 PDE 残差的修正项，引导生成轨迹向满足物理守恒律的流形收敛。这种方法被广泛应用于流体超分辨率（Super-Resolution）任务，即从低分辨率的稀疏观测中恢复高分辨率的湍流细节。此时，扩散模型充当了一个强大的“物理先验生成器”，填补了粗网格数据丢失的高频信息，同时保证重构结果在统计意义上符合 Navier-Stokes 方程的动力学特性。此外，在反问题求解中，条件扩散模型能够直接从观测数据采样出潜在的参数分布，为不适定问题（Ill-posed Problems）提供了一种具备贝叶斯解释的求解框架。
