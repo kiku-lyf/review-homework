@@ -16,16 +16,16 @@
 \studentid{1202411170}
 \cugthesismajor{计算机科学与技术}{Computer Science and Technology}
 \cugthesisdegree{硕士}{Master}
-\cugthesisteacher{导师姓名}{墙威}
+\cugthesisteacher{墙威}{Wei Qiang}
 \educatingunit{计算机学院}
-\cugthesisdate{2025}{十二}
+\cugthesisdate{2025}{12}
 
 
 % ----------------------------------------------------------------------
 % 摘要
 % ----------------------------------------------------------------------
 \cugabstract{
-偏微分方程（Partial Differential Equations, PDEs）是描述自然现象和工程问题的重要数学工具，广泛应用于流体力学、固体力学、电磁学、量子力学等领域。传统的数值方法如有限差分法、有限元法和有限体积法虽然成熟可靠，但在处理高维问题、复杂几何和多尺度问题时面临计算成本高、精度受限等挑战。近年来，深度学习技术的快速发展为解决偏微分方程提供了新的思路和方法。本文系统综述了深度学习方法在求解偏微分方程方面的研究进展，主要包括物理信息神经网络（Physics-Informed Neural Networks, PINNs）、神经算子（Neural Operators）、基于深度学习的数值方法\cite{yi2022ml_num_cn}等。首先，本文介绍了深度学习方法求解偏微分方程的研究背景和意义；其次，详细阐述了各类深度学习方法的基本原理、技术特点和适用范围；特别是针对神经算子方法与物理约束机制进行了深入探讨；然后，总结了这些方法在流体力学、固体力学、多物理场耦合等领域的应用；最后，分析了当前研究面临的挑战并展望了未来发展方向。
+偏微分方程（Partial Differential Equations, PDEs）是描述自然现象和工程问题的重要数学工具，广泛应用于流体力学、固体力学、电磁学、量子力学等领域。传统的数值方法如有限差分法、有限元法和有限体积法虽然成熟可靠，但在处理高维问题、复杂几何和多尺度问题时面临计算成本高、精度受限等挑战。近年来，深度学习技术的快速发展为解决偏微分方程提供了新的思路和方法。本文系统综述了深度学习方法在求解偏微分方程方面的研究进展，主要包括物理信息神经网络（Physics-Informed Neural Networks, PINNs）、神经算子（Neural Operators）、基于深度学习的数值方法\cite{李想2011机器学习与计算力学的结合及应用初探}等。首先，本文介绍了深度学习方法求解偏微分方程的研究背景和意义；其次，详细阐述了各类深度学习方法的基本原理、技术特点和适用范围；特别是针对神经算子方法与物理约束机制进行了深入探讨；然后，总结了这些方法在流体力学、固体力学、多物理场耦合等领域的应用；最后，分析了当前研究面临的挑战并展望了未来发展方向。
 }{
 Partial Differential Equations (PDEs) serve as fundamental mathematical tools for describing natural phenomena and engineering problems, with widespread applications in fluid mechanics, solid mechanics, electromagnetics, and quantum mechanics. While traditional numerical methods such as Finite Difference Method (FDM), Finite Element Method (FEM), and Finite Volume Method (FVM) are mature and reliable, they face significant challenges regarding computational cost and accuracy when dealing with high-dimensional problems, complex geometries, and multi-scale phenomena. Recently, the rapid development of deep learning technology has provided new paradigms for solving PDEs. This paper systematically reviews the progress of deep learning methods for solving PDEs, primarily covering Physics-Informed Neural Networks (PINNs), Neural Operators, and deep learning-based numerical methods. Firstly, the background and significance of the research are introduced. Secondly, the basic principles, technical characteristics, and scope of application of various deep learning methods are elaborated, with a particular focus on the mathematical equivalence and integral operators in Neural Operators. Thirdly, applications in fluid mechanics, solid mechanics, and multi-physics coupling are summarized. Finally, current challenges are analyzed, and future development directions are proposed. 
 }
@@ -48,7 +48,7 @@ Partial Differential Equations (PDEs) serve as fundamental mathematical tools fo
 
 传统网格法的优势非常明确：它们有严谨的误差理论、稳定性条件与可控的收敛性，并已沉淀为大量工业级软件。然而，随着研究从“单一工况的精确求解”转向“跨工况的大规模参数扫描、优化与实时决策”，数值法的代价问题被放大：在高维参数空间中，每一个参数点都要重新网格化与求解；对多尺度系统则需要局部极细网格才能捕捉薄层或激波结构；复杂几何下网格生成本身可能比求解更昂贵。对应地，许多应用场景（例如数字孪生、在线控制、不确定性量化/贝叶斯反演）要求在毫秒到秒级产生解场，传统求解器常无法满足时效。
 
-深度学习的介入改变了“求解”这一概念。神经网络在本质上是高维函数逼近器，其参数化方式不依赖显式网格结构；只要能提供优化信号，就可以逼近 PDE 解或解算子。自从 Raissi 等提出 PINNs 后，“把 PDE 残差当作训练监督”的想法使得无标签求解成为可能，并迅速扩展到逆问题、参数识别与多物理场耦合\cite{zhang2021pinn_survey_cn,liu2020pinn_cn}。与此同时，算子学习路线在“大量仿真数据 $\to$ 学习整体解映射”的框架下得到突破，DeepONet 的结构化算子网络与 FNO 的频域卷积让模型具备离散无关（resolution-invariant）和跨参数泛化能力，显著改变了代理建模与实时推理的性能上限\cite{lu2022learning_operators_survey,kovachki2023neural}。
+深度学习的介入改变了“求解”这一概念。神经网络在本质上是高维函数逼近器，其参数化方式不依赖显式网格结构；只要能提供优化信号，就可以逼近 PDE 解或解算子。自从 Raissi 等提出 PINNs 后，“把 PDE 残差当作训练监督”的想法使得无标签求解成为可能，并迅速扩展到逆问题、参数识别与多物理场耦合\cite{查文舒2022基于神经网络的偏微分方程求解方法研究综述,李道伦2023基于神经算子与类物理信息神经网络智能求解新进展}。与此同时，算子学习路线在“大量仿真数据 $\to$ 学习整体解映射”的框架下得到突破，DeepONet 的结构化算子网络\cite{李慧2025deeponet,王云朋2025基于神经算子的湍流模拟方法}与 FNO 的频域卷积\cite{卫兰2025基于傅里叶神经算子的遥感数据预测方法,李谌2024嵌入傅里叶神经算子的卷积自编码声波速度反演方法}让模型具备离散无关（resolution-invariant）和跨参数泛化能力，显著改变了代理建模与实时推理的性能上限\cite{lu2022learning_operators_survey,kovachki2023neural}。
 
 \section{研究意义}
 从理论视角看，深度学习 PDE 求解把“数值分析中的逼近理论”与“机器学习的泛化理论”直接连接起来。PINNs、Deep Ritz、Deep Galerkin 等方法把残差最小化、能量泛函最小化与弱形式投影转化为可微优化问题，使神经网络成为新的函数空间基底\cite{karniadakis2021physicsinformed,liu2023pinn_stiff_cn}。神经算子则从函数空间到函数空间学习映射，扩展了传统降阶模型（ROM）在非线性与高维情况下的适用边界，并激发了对算子逼近、误差上界与样本复杂度的系统研究\cite{chen1995universal,lu2021deeponet,lanthaler2022error_fno}。
@@ -91,7 +91,7 @@ F(x_1, x_2, \ldots, x_n, u, \frac{\partial u}{\partial x_1}, \frac{\partial u}{\
 \chapter{物理信息神经网络（PINN）}
 
 \section{PINN基本原理}
-物理信息神经网络（PINNs）由 Raissi 等人于 2019 年提出\cite{raissi2019physics}，其核心思想是将偏微分方程作为约束条件融入神经网络的损失函数中，随后被广泛综述并工程化实现\cite{zhang2021pinn_survey_cn,lu2021deepxde,liu2021pde_dl_cn}。考虑一般形式的偏微分方程：
+物理信息神经网络（PINNs）由 Raissi 等人于 2019 年提出\cite{raissi2019physics}，其核心思想是将偏微分方程作为约束条件融入神经网络的损失函数中，随后被广泛综述并工程化实现\cite{查文舒2022基于神经网络的偏微分方程求解方法研究综述,lu2021deepxde,liu2021pde_dl_cn}。考虑一般形式的偏微分方程：
 \begin{equation}
 \mathcal{N}[u](x,t) = 0, \quad (x,t) \in \Omega \times [0,T]
 \label{eq:pinn_pde}
@@ -218,11 +218,11 @@ XPINN（eXtended PINN）将求解域 $\Omega$ 分解为若干重叠或非重叠�
 v_{l+1}(x) = \sigma \left( W v_l(x) + \int_{D} \kappa(x, y; \phi) v_l(y) dy \right)
 \end{equation}
 其中积分核 $\kappa$ 的参数化方式决定了不同算子模型的本质区别。
-\section{基于基函数展开的 DeepONet\cite{guo2023deeponet_cn,yao2023deeponet_cn}}
+\section{基于基函数展开的 DeepONet}
 
 \subsection{理论基础与算子逼近范式}
 
-作为算子学习领域的开创性工作，DeepONet（Deep Operator Network）由 Lu 等人于 2019 年提出\cite{lu2021deeponet}，标志着深度学习从"学习单个函数"向"学习函数空间之间的映射算子"的范式转变\cite{lu2021deeponet,lu2022learning_operators_survey}。其理论基础源于 Chen 和 Chen 于 1995 年建立的通用算子逼近定理（Universal Approximation Theorem for Operators），该定理证明了任意连续非线性算子 $G^\dagger: \mathcal{A} \to \mathcal{U}$ 都可以被一个具有足够宽度或深度的神经网络以任意精度逼近\cite{chen1995universal}。这一理论保证为算子学习提供了坚实的数学根基，使得 DeepONet 能够在原则上逼近 PDE 求解这一本质上的算子映射过程\cite{guo2023deeponet_cn,yao2023deeponet_cn}。
+作为算子学习领域的开创性工作，DeepONet（Deep Operator Network）由 Lu 等人于 2019 年提出\cite{lu2021deeponet}，标志着深度学习从"学习单个函数"向"学习函数空间之间的映射算子"的范式转变\cite{lu2021deeponet,lu2022learning_operators_survey}。其理论基础源于 Chen 和 Chen 于 1995 年建立的通用算子逼近定理（Universal Approximation Theorem for Operators），该定理证明了任意连续非线性算子 $G^\dagger: \mathcal{A} \to \mathcal{U}$ 都可以被一个具有足够宽度或深度的神经网络以任意精度逼近\cite{chen1995universal}。这一理论保证为算子学习提供了坚实的数学根基，使得 DeepONet 能够在原则上逼近 PDE 求解这一本质上的算子映射过程\cite{李慧2025deeponet,王云朋2025基于神经算子的湍流模拟方法}。
 
 具体而言，算子逼近理论表明，任意算子 $G(a)(y)$ 可被近似为两组函数的内积形式：
 \begin{equation}
@@ -262,7 +262,7 @@ DeepONet 的核心优势体现在其对参数化 PDE 族的一次性学习能力
 
 尽管存在上述局限，DeepONet 所建立的算子学习框架为后续方法（如 Fourier Neural Operator、Graph Neural Operator 等）提供了重要启发，成为神经算子研究的重要里程碑。
 
-\section{频域视角与 Fourier Neural Operator\cite{huang2022fno_cn,zheng2023fno_multiscale_cn}}
+\section{频域视角与 Fourier Neural Operator}
 
 \subsection{从空间域到频域的算子学习范式转变}
 
@@ -309,7 +309,7 @@ v_{l+1}(x) = \sigma \left( W v_l(x) + \mathcal{F}^{-1}(R \cdot \mathcal{F}(v_l))
 
 \subsection{核心技术优势}
 
-FNO 的频域设计带来了三个层面的显著优势，使其在算子学习领域迅速成为主流方法之一\cite{huang2022fno_cn,cao2021choose_fno,lanthaler2022error_fno}。
+FNO 的频域设计带来了三个层面的显著优势，使其在算子学习领域迅速成为主流方法之一\cite{卫兰2025基于傅里叶神经算子的遥感数据预测方法,cao2021choose_fno,lanthaler2022error_fno}。
 
 \textbf{全局感受野与长程依赖建模}
 
@@ -341,11 +341,11 @@ FNO 最具革命性的特性在于其对网格分辨率的无关性（Resolution
 
 综上所述，FNO 通过频域操作实现了算子学习在效率、泛化性和表达能力上的重大突破，但其几何适用性仍需进一步扩展。当前的改进方向正朝着"频域高效性 + 几何灵活性 + 物理约束"的融合架构演进，为构建下一代通用物理求解器奠定基础。
 
-\section{图/点云/几何神经算子\cite{chen2023gnn_pde_cn,sun2023gnn_operator_cn}：复杂域的可泛化代理}
+\section{图/点云/几何神经算子：复杂域的可泛化代理}
 
 \subsection{从规则网格到非结构化表示}
 
-FNO 虽然在规则网格上实现了高效的全局算子学习，但其对快速傅里叶变换的依赖使其难以处理工程实际中广泛存在的复杂几何。真实物理系统往往定义在高度不规则的空间域上：机翼型面、车身外形、器官结构、多孔介质等，这些几何形状无法嵌入规则网格而不引入巨大计算浪费。传统 CFD 与 FEA 早已转向非结构化网格（Unstructured Grids），通过三角形、四面体等单元灵活拟合复杂边界。因此，构建能够天然处理非结构化数据的神经算子成为算子学习走向工程实用的关键。
+FNO 虽然在规则网格上实现了高效的全局算子学习，但其对快速傅里叶变换的依赖使其难以处理工程实际中广泛存在的复杂几何。真实物理系统往往定义在高度不规则的空间域上：机翼型面、车身外形、器官结构、多孔介质等，这些几何形状无法嵌入规则网格而不引入巨大计算浪费。传统 CFD 与 FEA 早已转向非结构化网格（Unstructured Grids），通过三角形、四面体等单元灵活拟合复杂边界。因此，构建能够天然处理非结构化数据的神经算子成为算子学习走向工程实用的关键。\cite{chen2023gnn_pde_cn,sun2023gnn_operator_cn}
 
 图神经算子（Graph Neural Operator, GNO）的核心思想是将物理域的离散化表示从"规则网格阵列"转变为"图结构 $G=(V, E)$"，通过图神经网络的消息传递机制将连续核积分算子近似为图上的邻域聚合操作\cite{li2020graphneuraloperator,li2022gino,chen2023gnn_pde_cn,sun2023gnn_operator_cn}。
 
@@ -394,13 +394,13 @@ GNO 天然具备处理任意复杂几何形状的能力，具有极强的几何�
 % ----------------------------------------------------------------------
 \chapter{其他深度学习方法}
 
-\section{基于深度学习的数值方法\cite{yi2022ml_num_cn}}
-这类方法将深度学习与传统数值方法结合，用神经网络改进数值方法的某些环节。例如，学习型有限差分方法用神经网络学习差分格式的系数，PDE-Net 使用可学习的卷积核近似微分算子，通过约束确保卷积核的微分性质。此外，Solver-in-the-Loop 方法将可微分的物理求解器与神经网络结合，通过端到端训练优化数值格式。这种混合范式保留了数值方法的稳定框架，仅将关键但难以手工设计的部件（如通量形式、预条件器）交给网络学习。
+\section{基于深度学习的数值方法}
+这类方法将深度学习与传统数值方法结合，用神经网络改进数值方法的某些环节\cite{李想2011机器学习与计算力学的结合及应用初探}。例如，学习型有限差分方法用神经网络学习差分格式的系数，PDE-Net 使用可学习的卷积核近似微分算子，通过约束确保卷积核的微分性质。此外，Solver-in-the-Loop 方法将可微分的物理求解器与神经网络结合，通过端到端训练优化数值格式。这种混合范式保留了数值方法的稳定框架，仅将关键但难以手工设计的部件（如通量形式、预条件器）交给网络学习。
 这类方法将深度学习与传统数值方法结合，用神经网络改进数值方法的某些环节，发挥传统方法的成熟性和深度学习的灵活性。
 
 学习型有限差分方法用神经网络学习差分格式的系数，可以根据问题的特点自适应调整，提高精度和稳定性\cite{long2019pdenet}。有限差分法用差商近似导数，差分格式的系数决定了精度和稳定性。学习型有限差分用神经网络学习差分格式的系数，可以根据问题的特点自适应调整，提高精度和稳定性。Long等人提出的PDE-Net使用可学习的卷积核近似微分算子，通过约束确保卷积核的微分性质\cite{long2019pdenet}。这种方法可以同时识别偏微分方程和求解，为数据驱动的偏微分方程研究提供工具\cite{long2019pdenet}。
 
-学习型有限元方法用神经网络优化基函数\cite{gao2023dl_fem_cn}，可以学习问题特定的基函数，提高计算效率。有限元法使用基函数近似未知函数，基函数的选择影响精度和效率。学习型有限元用神经网络优化基函数，可以学习问题特定的基函数，提高计算效率。Alet等人提出的图元网络（Graph Element Network）模仿有限元分析的行为，使用图神经网络建模空间关系，节点位置和连接都可以优化。
+学习型有限元方法用神经网络优化基函数\cite{郭鹏2020基于深度强化学习与有限元仿真集成的拉深成形控制}，可以学习问题特定的基函数，提高计算效率。有限元法使用基函数近似未知函数，基函数的选择影响精度和效率。学习型有限元用神经网络优化基函数，可以学习问题特定的基函数，提高计算效率。Alet等人提出的图元网络（Graph Element Network）模仿有限元分析的行为，使用图神经网络建模空间关系，节点位置和连接都可以优化。
 
 学习型有限体积方法用神经网络预测数值通量，可以学习更精确的通量格式，同时保持守恒性\cite{barsinai2019learning}。有限体积法通过数值通量近似边界积分，数值通量的选择影响精度和守恒性。学习型有限体积用神经网络预测数值通量，可以学习更精确的通量格式，同时保持守恒性。Bar-Sinai等人使用卷积神经网络生成有限体积法的系数，在低分辨率网格上也能产生准确结果\cite{barsinai2019learning}。
 
@@ -408,16 +408,16 @@ GNO 天然具备处理任意复杂几何形状的能力，具有极强的几何�
 
 学习型 PDE 方法并不总是要“重写求解器”。PDE-Net、Solver-in-the-loop、可学习通量与可学习预条件器的思路是：保留数值法的稳定框架，只把关键但难手工设计的部件（差分核、通量形式、迭代更新/预条件）交给网络学习。\cite{long2019pdenet,um2020solverinthelooop} 例如 PDE-Net 用可学习卷积核近似微分算子，并通过结构约束保证卷积核的导数一致性，从而能同时完成方程识别与求解；学习型有限体积通量在粗网格上仍可保持较高精度与守恒；而神经预条件器能显著减少 Krylov/Newton迭代步数。\cite{mcclenny2020selfadaptive,wight2020solving,yang2019adversarial_sampling}
 
-\section{生成式模型与扩散 PDE 求解\cite{zhao2022generative_pde_cn,xu2023diffusion_pde_cn}}
+\section{生成式模型与扩散 PDE 求解}
 
 \subsection{从确定性回归到概率分布建模}
-传统的基于神经网络的 PDE 求解方法（如 PINNs 和 DeepONet）通常被构建为确定性的回归问题，即寻找一个单一的最优解函数以最小化残差或数据误差。然而，在面对反问题求解、高雷诺数湍流模拟以及数据稀缺场景下的不确定性量化（Uncertainty Quantification, UQ）时，点估计方法往往难以捕捉解的多模态分布特性。生成式模型（Generative Models）的引入标志着求解范式从“寻找单一解”向“模拟解的条件概率分布”转变\cite{zhao2022generative_pde_cn,liu2022pinn_uncertainty,yang2021bayesian_pinn}。通过学习数据分布 $p(u|y)$（其中 $u$ 为物理场，$y$ 为观测条件），生成式模型不仅能够重构高保真的物理场，还能通过采样直接评估预测的不确定性，为复杂物理系统的建模提供了新的统计力学视角。
+传统的基于神经网络的 PDE 求解方法（如 PINNs 和 DeepONet）通常被构建为确定性的回归问题，即寻找一个单一的最优解函数以最小化残差或数据误差。然而，在面对反问题求解、高雷诺数湍流模拟以及数据稀缺场景下的不确定性量化（Uncertainty Quantification, UQ）时，点估计方法往往难以捕捉解的多模态分布特性。生成式模型（Generative Models）的引入标志着求解范式从“寻找单一解”向“模拟解的条件概率分布”转变\cite{zhao2022generative_pde_cn,liu2022pinn_uncertainty,yang2021bayesian_pinn}。通过学习数据分布 $p(u|y)$（其中 $u$ 为物理场，$y$ 为观测条件），生成式模型不仅能够重构高保真的物理场，还能通过采样直接评估预测的不确定性，为复杂物理系统的建模提供了新的统计力学视角\cite{zhao2022generative_pde_cn,huang2024diffusionpde}。
 
 \subsection{早期探索：对抗生成与变分推断}
-早期的研究主要集中在物理信息生成对抗网络（Physics-Informed GANs, PI-GANs）\cite{yang2020pigans}和变分自编码器（VAEs）。PI-GANs 通过在判别器中引入 PDE 残差项，迫使生成器产生的样本不仅符合数据分布，同时满足物理约束。这种对抗博弈机制在模拟随机渗透率场中的达西流（Darcy Flow）等问题上取得了一定成功。然而，GANs 固有的训练不稳定性（如模式坍塌）以及 VAEs 在生成高频纹理时的模糊性，限制了它们在精细流场模拟中的应用。尽管如此，这些工作证实了深度生成模型具备在无标签数据情况下，仅依靠物理控制方程生成符合物理规律解空间的能力\cite{xu2023diffusion_pde_cn}.
+早期的研究主要集中在物理信息生成对抗网络（Physics-Informed GANs, PI-GANs）\cite{yang2020pigans}和变分自编码器（VAEs）。PI-GANs 通过在判别器中引入 PDE 残差项，迫使生成器产生的样本不仅符合数据分布，同时满足物理约束。这种对抗博弈机制在模拟随机渗透率场中的达西流（Darcy Flow）等问题上取得了一定成功。然而，GANs 固有的训练不稳定性（如模式坍塌）以及 VAEs 在生成高频纹理时的模糊性，限制了它们在精细流场模拟中的应用。尽管如此，这些工作证实了深度生成模型具备在无标签数据情况下，仅依靠物理控制方程生成符合物理规律解空间的能力\cite{huang2024diffusionpde}.
 
 \subsection{扩散模型：随机微分方程的逆向求解}
-近年来，去噪扩散概率模型（Denoising Diffusion Probabilistic Models, DDPM）\cite{ho2020denoising}和基于分数的生成模型（Score-based Generative Models, SGM）的兴起，为 PDE 求解带来了突破性进展\cite{xu2023diffusion_pde_cn,xu2020pinn_fluid_cn}。从理论层面看，扩散模型的正向过程本身就是一个由随机微分方程（SDE）描述的物理扩散过程（即热方程演化），其将结构化数据逐渐转化为高斯噪声；而逆向生成过程则对应于求解一个逆时间的 SDE。根据 Anderson 定理，这一逆向过程完全由数据分布的“分数函数”（Score Function，即对数概率密度梯度 $\nabla_x \log p(x)$）决定。因此，训练扩散模型本质上是在学习高维物理场分布的梯度场。这种严格的数学等价性使得扩散模型在处理高维、非线性 PDE 时表现出极高的稳定性和样本质量，特别是在生成具有精细相干结构的湍流场方面，其表现显著优于 GANs。
+近年来，去噪扩散概率模型（Denoising Diffusion Probabilistic Models, DDPM）\cite{ho2020denoising}和基于分数的生成模型（Score-based Generative Models, SGM）的兴起，为 PDE 求解带来了突破性进展\cite{huang2024diffusionpde,xu2020pinn_fluid_cn}。从理论层面看，扩散模型的正向过程本身就是一个由随机微分方程（SDE）描述的物理扩散过程（即热方程演化），其将结构化数据逐渐转化为高斯噪声；而逆向生成过程则对应于求解一个逆时间的 SDE。根据 Anderson 定理，这一逆向过程完全由数据分布的“分数函数”（Score Function，即对数概率密度梯度 $\nabla_x \log p(x)$）决定。因此，训练扩散模型本质上是在学习高维物理场分布的梯度场。这种严格的数学等价性使得扩散模型在处理高维、非线性 PDE 时表现出极高的稳定性和样本质量，特别是在生成具有精细相干结构的湍流场方面，其表现显著优于 GANs。
 
 \subsection{物理引导的扩散采样与超分辨率}
 为了将物理定律更深层次地融入扩散模型，最新的研究提出了“物理引导采样”（Physics-Guided Sampling）策略。不同于在训练阶段将 PDE 残差加入损失函数（这需要重新训练模型），该策略利用预训练的扩散模型作为先验，在推理采样阶段（Sampling Phase）引入物理约束。通过在朗之万动力学（Langevin Dynamics）迭代中加入基于 PDE 残差的修正项，引导生成轨迹向满足物理守恒律的流形收敛。这种方法被广泛应用于流体超分辨率（Super-Resolution）任务，即从低分辨率的稀疏观测中恢复高分辨率的湍流细节。此时，扩散模型充当了一个强大的“物理先验生成器”，填补了粗网格数据丢失的高频信息，同时保证重构结果在统计意义上符合 Navier-Stokes 方程的动力学特性。此外，在反问题求解中，条件扩散模型能够直接从观测数据采样出潜在的参数分布，为不适定问题（Ill-posed Problems）提供了一种具备贝叶斯解释的求解框架。
@@ -491,7 +491,7 @@ GNO 天然具备处理任意复杂几何形状的能力，具有极强的几何�
 
 量子力学问题涉及Schrödinger方程，高维问题难以用传统方法求解\cite{han2018solving_bsde}。深度学习方法可以处理高维Schrödinger方程，突破传统方法的维度限制，为量子系统模拟提供新方法\cite{raissi2019physics,han2018solving_bsde}。PINN可以求解时间相关的Schrödinger方程，预测量子系统的演化\cite{raissi2019physics,han2018solving_bsde}。在电磁与量子问题中，PINN的无网格特性对复杂几何尤其有价值\cite{raissi2019physics,li2021fourier,han2018solving_bsde}。神经算子方法可以学习量子系统的求解算子，对于不同的初始条件和参数，可以快速预测波函数，为量子系统的参数化研究提供了高效工具\cite{li2021fourier,lu2021deeponet}。
 
-电磁学问题涉及Maxwell方程，是天线设计、电磁兼容等的基础\cite{zhang2021pinn_survey_cn}。Maxwell方程描述了电磁场的行为，深度学习方法可以求解Maxwell方程，处理复杂几何和时变问题\cite{raissi2019physics,zhang2021pinn_survey_cn}。PINN可以求解时域和频域Maxwell方程，预测电磁场分布，为天线设计、电磁兼容等问题提供快速求解工具\cite{raissi2019physics,zhang2021pinn_survey_cn}。神经算子方法可以学习Maxwell方程的求解算子，实现快速推理，特别适合优化设计等需要大量重复求解的场景\cite{li2020neural_operator,li2021fourier,lu2021deeponet}。
+电磁学问题涉及Maxwell方程，是天线设计、电磁兼容等的基础\cite{查文舒2022基于神经网络的偏微分方程求解方法研究综述}。Maxwell方程描述了电磁场的行为，深度学习方法可以求解Maxwell方程，处理复杂几何和时变问题\cite{raissi2019physics,查文舒2022基于神经网络的偏微分方程求解方法研究综述}。PINN可以求解时域和频域Maxwell方程，预测电磁场分布，为天线设计、电磁兼容等问题提供快速求解工具\cite{raissi2019physics,查文舒2022基于神经网络的偏微分方程求解方法研究综述}。神经算子方法可以学习Maxwell方程的求解算子，实现快速推理，特别适合优化设计等需要大量重复求解的场景\cite{li2020neural_operator,li2021fourier,lu2021deeponet}。
 
 生物医学问题涉及生物传质方程、血流动力学等复杂的生理过程\cite{raissi2019physics}。深度学习方法可以为这些问题提供快速求解工具。例如，可以使用PINN求解药物输送方程，预测药物浓度分布，为药物设计和给药方案优化提供支持\cite{raissi2019physics}。神经算子方法可以学习血流动力学的求解算子，用于心血管疾病诊断和治疗，实现快速的血流动力学分析\cite{li2021fourier,lu2021deeponet,raissi2019physics}。
 
@@ -512,16 +512,36 @@ GNO 天然具备处理任意复杂几何形状的能力，具有极强的几何�
 \chapter{挑战与展望}
 
 \section{当前挑战}
-现阶段最大的科学问题是“可训练性与可信度”。PINNs 的训练收敛并非由离散稳定性控制，而是由优化景观与梯度尺度控制，针对强对流、长时混沌与高维系统仍缺乏统一的成功条件。神经算子虽然泛化能力强，但对训练数据分布敏感，当遇到分布外（Out-of-Distribution）的几何或参数时，性能可能显著退化。
+尽管深度学习在求解偏微分方程（PDEs）方面取得了显著进展，但要真正替代或辅助传统数值方法进入工业级应用，仍面临着从理论基础到工程实践的多重挑战。现阶段的核心矛盾可以概括为“可训练性（Trainability）、泛化性（Generalizability）与可信度（Trustworthiness）”之间的权衡。
+
+\subsection{理论分析的滞后性与优化困境}
+目前关于 PINNs 和神经算子的理论研究多集中于通用逼近定理（Universal Approximation Theorem），证明了神经网络在理论上能够以任意精度逼近 PDE 的解或算子\cite{chen1995universal,kovachki2023neural}。然而，逼近能力并不等同于优化能力。PINN 的损失函数通常是非凸的，且包含多个相互竞争的物理约束项，这导致优化景观中存在大量局部极小值和鞍点，使得基于梯度的优化算法容易陷入次优解\cite{wang2021understanding_pinn}。此外，与传统有限元法（FEM）拥有完善的误差估计和收敛阶理论不同，深度学习方法尚缺乏针对特定 PDE 类型的先验误差界，目前难以准确预估在给定网络规模和样本量下的求解精度，这限制了其在航空航天等高安全要求领域的应用。
+
+\subsection{高维与多尺度系统的计算瓶颈}
+虽然深度学习被认为有望打破“维数灾难”，但在处理极端复杂系统时仍面临计算瓶颈。在湍流、多孔介质流动等问题中，物理过程跨越多个时空尺度（从 Kolmogorov 尺度到积分尺度），为了解析微小尺度的特征，神经网络需要极大的容量（参数量）和海量的训练配点，导致训练成本甚至超过直接数值模拟（DNS）。同时，对于具有快慢动力学耦合的刚性方程（如化学反应流），时间步长的选择受到极大约束，现有的时间步进 PINN 或连续时间模型往往难以在长时间积分中保持数值稳定性。
+
+\subsection{数据依赖与分布外泛化}
+神经算子（如 FNO, DeepONet）虽然实现了算子级的映射，但其性能高度依赖于训练数据的质量和覆盖范围。当测试案例的几何形状、边界条件或参数分布超出训练集覆盖范围时，模型的分布外（OOD）泛化能力往往会急剧下降，预测精度无法保证。此外，对于许多实际工程问题，获取大规模的高保真仿真数据以训练算子模型本身就是极其昂贵的，这种高昂的数据获取成本在一定程度上抵消了代理模型在推理阶段带来的速度优势。
 
 \section{未来展望}
-未来方向正在从“单方法改良”走向“基础模型 + 混合求解器”。一方面，基于大规模多物理数据预训练的“PDE 基础模型”有望降低新任务的适配成本；另一方面，将神经算子作为粗尺度预处理器，结合 PINNs 或可微求解器进行细尺度修正的分层混合框架，将是兼顾精度、效率与泛化性的重要路径。
+面对上述挑战，未来的研究将不再局限于单一网络架构的修补，而是向着“物理知识深度融合”、“基础模型化”和“混合计算范式”演进。
+
+\subsection{物理基础模型（Physics Foundation Models）}
+受自然语言处理（NLP）领域大语言模型（LLM）的启发，构建面向科学计算的“基础模型”将是未来的重要方向。通过在海量的多物理场数据（涵盖流体、固体、电磁等）上进行预训练，模型可以学习到通用的物理守恒律和时空演化模式。在下游任务中，只需通过少量的样本微调（Few-shot Finetuning）或提示工程（Prompt Engineering），即可适应特定的 PDE 求解任务。这种“预训练-微调”范式有望显著降低新问题的建模成本。
+
+\subsection{神经-数值混合求解器（Hybrid Neuro-Numerical Solvers）}
+深度学习与传统数值方法并非对立关系，而是互补关系，未来的主流求解器将是两者的深度融合。一方面，可以利用神经网络辅助传统求解，加速其瓶颈环节，例如学习最优的网格划分策略、构建高效的预条件子（Preconditioners）或替代复杂的物理闭包模型（如湍流模式）。另一方面，可微物理编程将成为重要趋势，即将传统数值离散格式编写为可微分算子并嵌入到深度学习框架中。这种“物理可微层”的设计既保留了数值方法的理论保证，又具备深度学习的优化灵活性，实现了数据驱动与物理机理的双向赋能。
+
+\subsection{可解释性与物理守恒的内嵌}
+为了提高模型的可信度，必须从“软约束”走向“硬约束”。除了在损失函数中添加惩罚项外，未来的网络架构将更多地利用群论、微分几何等数学工具，构建具有 $SE(3)$ 等变性、辛结构保全或严格质量守恒的神经网络架构（如 HNN, SympNets）。同时，开发针对科学机器学习的可解释性工具，分析网络内部关注的物理特征，对于发现新物理规律具有重要意义。
 
 % ----------------------------------------------------------------------
 % 第八章 结论
 % ----------------------------------------------------------------------
 \chapter{结论}
-深度学习方法为偏微分方程求解带来了范式上的革新。PINNs 实现了无网格的物理约束求解，神经算子实现了函数空间的高效映射，而生成式模型为不确定性量化提供了新工具。尽管面临理论完备性和训练稳定性的挑战，随着 Transformer、扩散模型等新架构与物理知识的深度融合，该领域将在科学计算与工程设计中发挥日益关键的作用。
+本文系统综述了深度学习方法在求解偏微分方程领域的研究进展，涵盖了从基础理论、核心算法到工程应用的全貌。在方法论革新方面，物理信息神经网络（PINNs）通过将物理方程作为正则化约束，实现了无网格、无标签的求解范式，特别适用于逆问题和高维问题；而神经算子（Neural Operators）通过学习无限维函数空间之间的映射，实现了分辨率无关的快速推理，为实时仿真和参数化设计提供了新途径。在应用广度上，这些方法已成功渗透到流体力学、固体力学、多物理场耦合等多个学科，解决了一系列传统方法难以处理的复杂问题，如稀疏数据下的流场重建、非结构化网格上的快速预测等。尽管深度学习方法在精度和理论完备性上仍有待完善，但它并非要完全取代传统数值方法，而是作为一种强大的补充工具，与之形成“双引擎”驱动。
+
+展望未来，随着物理基础模型的兴起、混合计算架构的成熟以及数学理论的完善，深度学习求解 PDE 将从一种“实验性尝试”转变为科学计算领域的“标准范式”之一，在数字孪生、自动驾驶、气候预测及先进制造等关键领域发挥不可替代的作用。科学计算的未来，必将是物理机理与数据智能深度融合的时代。
 
 \bibliography{tex}
 \backmatter
