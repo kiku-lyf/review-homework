@@ -162,7 +162,7 @@
 \fi
 \RequirePackage{zhnumber}
 \newcommand{\cugthesisdate}[2]{%
-    \date{\zhdigits{#1}年\zhdigits{#2}月}
+    \date{\zhdigits{#1}年\zhnumber{#2}月}
 }
 %\cug@define@term{date}
 \newcommand{\cug@degree@cn}{硕士}
